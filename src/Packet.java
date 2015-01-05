@@ -8,7 +8,6 @@ public class Packet
 {
     int size;
     double latency;
-	int numbOfRetrans;
     double accepTraffic;
 	int priority;
     String source;
@@ -79,11 +78,6 @@ public class Packet
         return accepTraffic;
     }
 	
-	public int getnumbOfRetrans()
-	{
-		return this.numbOfRetrans;
-	}
-	
     
     /*public void setLatency(double latency) 
 	{
@@ -95,11 +89,6 @@ public class Packet
 		this.flux[0]=src;
 		this.flux[1]=dst;
 	}
-	
-	public void setnumbOfRetrans(int numbOfRetrans) 
-	{
-        this.numbOfRetrans = numbOfRetrans;
-    }
 	
     public void setPriority(int priority) 
 	{
@@ -127,15 +116,14 @@ public class Packet
 //    }
     
     //Construtor, inicializa todos os atributos do pacote através da classe HandleFiles
-    public Packet(String target, String size, String source, double latency, double tpflext, int numbOfRetrans) 
+    public Packet(String target, int size, String source, double latency, double tpflext) 
 	{   
-        this.size = Integer.parseInt(size.substring(2, 4),16);
+        this.size = size;
         this.latency = latency;
         this.priority = Integer.parseInt(target.substring(0, 1));
         this.source = source;
         this.target = target;
         this.tpflext = tpflext;
-		this.numbOfRetrans = numbOfRetrans;
     }
 
     //Verifica se o pacote é de um tipo especificado

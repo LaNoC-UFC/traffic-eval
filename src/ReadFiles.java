@@ -17,7 +17,8 @@ public class ReadFiles {
     	return this.nRetranspFLuxs;
     }
     
-    public Packet[] read(String path){
+    public Packet[] read(String path)
+    {
         
         String[] listfiles; //files contem os arquivos do path
         
@@ -30,6 +31,7 @@ public class ReadFiles {
        
              file = handlefiles.OpenFilestoRead(path + "//" + listfiles[numbfiles]); //Abre arquivos no path para leitura file é arquivo que será lido
              //System.out.println(path + "//" + listfiles[numbfiles]);
+             System.out.println("file"+listfiles[numbfiles]);
              
              int a = 0; //Auxiliar para calcular tráfego aceito
 
@@ -59,49 +61,26 @@ public class ReadFiles {
         
     }
     
-
-    //Ler os dados de um PACOTE
-    private Packet ReadOnePacket(){
-        
-            String Target = file.next(); //Pega primeiro nibble do arquivo
-            
-            String size = file.next(); //Pega segundo nibble do arquivo
-           
-            String source = file.next(); //Pega terceiro nibble do arquivo
-			
-            String flux = source.substring(2)+" "+Target.substring(2);
-			int numbOfRetrans=0;
-			
-                        
-            for(int a = 0 ; a < Integer.parseInt(size,16) + AUXTOGETLAT ; a++)
-			{               
-			   if(a==(Integer.parseInt(size,16)-2))
-			   {
-				   if(!nRetranspFLuxs.containsKey(flux))
-				   {
-					   numbOfRetrans = Integer.parseInt(file.next());
-					   nRetranspFLuxs.put(flux, numbOfRetrans);
-				   }
-				   else
-				   {
-					   nRetranspFLuxs.put(flux,nRetranspFLuxs.get(flux)+Integer.parseInt(file.next()));
-				   }
-				   //System.out.println("Number of Retransmissions: "+numbOfRetrans);
-				   continue;
-			   }
-			   
-               file.next();
-               
-            }
+    private Packet ReadOnePacket()
+    {        
+            String binTarget = String.format("%16s", Integer.toBinaryString(Integer.parseInt(file.next(),16))).replace(" ", "0");
+            int size = Integer.parseInt(file.next(),16);
+            String source = file.next();
+            int nSeq = Integer.parseInt(file.next()+file.next(),16);
             
             double Tpflext = Double.parseDouble(file.next()); 
             double Latency = Double.parseDouble(file.next());
             
             
-            file.nextLine(); //Pega o que sobrou da linha pra não dar erro no proximo laço
+            file.nextLine(); //Pega o que sobrou da linha
            
+            int tX = Integer.parseInt(binTarget.substring(0, binTarget.length()/2),2);
+            int tY = Integer.parseInt(binTarget.substring(binTarget.length()/2, binTarget.length()),2);
             
-            Packet pck = new Packet (Target,size,source,Latency,Tpflext,numbOfRetrans); //inicializa pacote
+            String Target = tX+"."+tY;
+            
+            System.out.println("Target: "+Target);
+            Packet pck = new Packet (Target,size,source,Latency,Tpflext);
             
             return pck;
      
