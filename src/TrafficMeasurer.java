@@ -43,7 +43,7 @@ public class TrafficMeasurer
 					Evaluation eval;
 					eval = new Evaluation( nets[k], pathN4,graphsPath, dimX, dimY);
 					eval.makeCNFs();
-					eval.plotCNFs();
+					//eval.plotCNFs();
 					eval.printRetrans();
 				}
 			//}

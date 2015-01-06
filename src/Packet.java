@@ -107,15 +107,14 @@ public class Packet
     
     public void setAccepTraffic(double tpflext1)
 	{           
-        this.accepTraffic = ((double)this.size+2)/(tpflext1 - this.tpflext); //Calcula tráfego aceito do pacote
+        this.accepTraffic = ((double)this.size+2)/(tpflext1 - this.tpflext);
     }
     
-//    public void setAccepTraffic(double acceptraffic)
-//	{           
-//        this.accepTraffic = acceptraffic;   
-//    }
+    public void setLastAccepTraffic(double acceptraffic)	
+    {           
+        this.accepTraffic = acceptraffic;   
+    }
     
-    //Construtor, inicializa todos os atributos do pacote através da classe HandleFiles
     public Packet(String target, int size, String source, double latency, double tpflext) 
 	{   
         this.size = size;
