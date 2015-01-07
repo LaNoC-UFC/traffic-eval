@@ -25,7 +25,7 @@ public class ReadFiles {
 												// leitura file é arquivo que
 												// será lido
 			// System.out.println(path + "//" + listfiles[numbfiles]);
-			// System.out.println("file"+listfiles[numbfiles]);
+			System.out.println("file"+listfiles[numbfiles]);
 
 			double LastAccTraf = 0;
 
@@ -36,7 +36,7 @@ public class ReadFiles {
 
 				Packet pck = ReadOnePacket();
 
-				double accepTraffic = (double) aux.size()/(pck.getTpflext() - aux.getTpflext());
+				double accepTraffic = ((double) aux.size())/(pck.getTpflext() - aux.getTpflext());
 				
 				aux.setAccepTraffic(accepTraffic);
 				LastAccTraf = accepTraffic;
@@ -71,6 +71,7 @@ public class ReadFiles {
 		double Tpflext = Double.parseDouble(file.next());
 		System.out.println("Tpflext: " + Tpflext);
 		double Latency = Double.parseDouble(file.next());
+		System.out.println("Latency: " + Latency);
 
 		file.nextLine(); // Pega o que sobrou da linha
 
