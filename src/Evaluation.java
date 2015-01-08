@@ -1,9 +1,11 @@
+import java.util.ArrayList;
+
 
 public class Evaluation {
-	private Packet[] pcks;
+	private ArrayList<Packet> pcks;
 	private int OL; // carga oferecida
-	String strOL;
-	private int nPacks; // número total de pacotes
+	private String strOL;
+	//private int pcks.length; // número total de pacotes
 	//private int dX; // dimensão em X
 	//private int dY; // dimensão em Y
 	//private String topology; // topologia da rede
@@ -15,11 +17,13 @@ public class Evaluation {
 	private int nDot = 30; // quantidade de pontos dos gráficos de distribuição
 							// espacial
 	//Map<String, Integer> nRetranspFLuxs = new HashMap<String, Integer>();
+	private double[] lat;
+	private double[] accTraffic;
 
 	// Construtores
 
 	public Evaluation(String pathTst, String graphsPath, String rede,
-			String offerLoad, int dimX, int dimY, String net) {
+			String offerLoad, String net) {
 		this.strOL = offerLoad;
 		//this.rede = rede;
 		this.graphsPath = graphsPath;
@@ -34,8 +38,10 @@ public class Evaluation {
 		ReadFiles read = new ReadFiles(path);
 		//this.nRetranspFLuxs = read.getnRetranspFluxs();
 		this.pcks = read.read();
+		lat = read.latStats();
+		accTraffic = read.accTrafficStats();
 		// armazena dados nos Packet[]
-		this.nPacks = pcks.length;
+		//this.pcks.length = pcks.length;
 	}
 
 	/*
@@ -58,13 +64,13 @@ public class Evaluation {
 
 	/*
 	 * public int getNPck(  ) { int nPck = 0; for( int i = 0 ; i <
-	 * nPacks ; i++ ) if ( pcks[i].isType( tipo ) ) nPck++; return nPck; }
+	 * pcks.length ; i++ ) if ( pcks[i].isType( tipo ) ) nPck++; return nPck; }
 	 */
 
 	/*
 	private int getNPck(int Xs, int Ys) {
 		int nPck = 0;
-		for (int i = 0; i < nPacks; i++)
+		for (int i = 0; i < pcks.length; i++)
 			if (pcks[i].getXs() == Xs && pcks[i].getYs() == Ys)
 				nPck++;
 		return nPck;
@@ -84,21 +90,20 @@ public class Evaluation {
 	/*
 	private int getHopCountAcc() {
 		int hCAcc = 0;
-		for (int i = 0; i < nPacks; i++)
+		for (int i = 0; i < pcks.length; i++)
 			hCAcc += hopCount(pcks[i]);
 		return hCAcc;
 	}
 
 	private double getHopCountMean() {
 		int hCAcc = getHopCountAcc();
-		return hCAcc / nPacks;
+		return hCAcc / pcks.length;
 	}
 	*/
 
 	// Arquivos
-
 	/* Gera o arquivo para a confecção do Distribuição Espacial da Latência Pura */
-	public void makeSpatDistriLat() {
+	public void makeHistLat() {
 		int nPcks[] = new int[nDot]; // contém as quantidades pacotes com a
 										// latência correspondente
 		double lats[] = new double[nDot]; // contém as latências distintas
@@ -107,9 +112,8 @@ public class Evaluation {
 		double step = (lats[nDot - 1] - lats[0]) / nDot;
 		for (int i = 1; i < nDot; i++) {
 			lats[i] = lats[i - 1] + step;
-			for (int j = 0; j < nPacks; j++)
-				if (pcks[j].latency() <= lats[i]
-						&& pcks[j].latency() >= lats[i - 1])
+			for(Packet pck: pcks)
+				if (pck.latency() <= lats[i] && pck.latency() >= lats[i - 1])
 					nPcks[i - 1]++;
 		}
 
@@ -126,7 +130,7 @@ public class Evaluation {
 	 * latNs[] = new double[ nDot ]; // contém as latências distintas latNs[0] =
 	 * this.latencyNMin( tipo ); latNs[ nDot-1 ] = this.latencyNMax( tipo );
 	 * double step = ( latNs[ nDot-1 ] - latNs[0] )/nDot; for( int i = 1; i <
-	 * nDot; i++ ) { latNs[i] = latNs[i-1] + step; for( int j = 0; j < nPacks;
+	 * nDot; i++ ) { latNs[i] = latNs[i-1] + step; for( int j = 0; j < pcks.length;
 	 * j++ ) if ( pcks[j].isType( tipo ) && this.latencyN( pcks[j] ) <= latNs[i]
 	 * && this.latencyN( pcks[j] ) >= latNs[i-1] ) nPcks[i-1]++; }
 	 * 
@@ -138,7 +142,7 @@ public class Evaluation {
 	 * Gera o arquivo para a confecção do Distribuição Espacial do Tráfego
 	 * Aceito
 	 */
-	public void makeSpatDistriAccepTraff() {
+	public void makeHistAccepTraff() {
 		int nPcks[] = new int[nDot]; // contém as quantidades pacotes com a
 										// latência correspondente
 		double accepTraffs[] = new double[nDot]; // contém as latências
@@ -148,9 +152,8 @@ public class Evaluation {
 		double step = (accepTraffs[nDot - 1] - accepTraffs[0]) / nDot;
 		for (int i = 1; i < nDot; i++) {
 			accepTraffs[i] = accepTraffs[i - 1] + step;
-			for (int j = 0; j < nPacks; j++)
-				if (pcks[j].accepTraffic() <= accepTraffs[i]
-						&& pcks[j].accepTraffic() >= accepTraffs[i - 1])
+			for(Packet pck: pcks)
+				if (pck.accepTraffic() <= accepTraffs[i] && pck.accepTraffic() >= accepTraffs[i - 1])
 					nPcks[i - 1]++;
 		}
 
@@ -178,12 +181,12 @@ public class Evaluation {
 
 	/* Escreve arquivo de relatório */
 	public void makeRelat() {
-		String[] Relat = new String[13];
+		String[] Relat = new String[4];
 		int i = 0;
 		// nome da rede - tipo de tráfego - carga oferecida
 		Relat[i++] = " - " + OL + "%";
 		// porcentagem de alta e baixa prioridade
-		Relat[i++] = "Quantidade total de pacotes:  " + nPacks;
+		Relat[i++] = "Quantidade total de pacotes:  " + pcks.size();
 		// valor de hopcount médio
 		//Relat[i++] = "HopCount medio: " + getHopCountMean();
 			// latência pura: média+-desvio / [máximo,mínimo]
@@ -231,47 +234,41 @@ public class Evaluation {
 
 	// Latências Puras
 
+	/*
 	private double latencyAcc() // acumulada
 	{
 		double latAcc = 0;
-		for (int i = 0; i < nPacks; i++)
+		for (int i = 0; i < pcks.length; i++)
 			latAcc += pcks[i].latency();
 		return latAcc;
 	}
+	*/
 
 	public double latencyMean() // média
 	{
-		return (nPacks != 0) ? latencyAcc() / (double) nPacks : -1.0;
+		return lat[1];
 	}
 
 	private double latencyStdDev() // desvio padrão
 	{
-		if (nPacks != 0) {
-			double latMean = latencyMean();
+		if (pcks.size() != 0) {
+			double latMean = lat[1];
 			double sum = 0;
-			for (int i = 0; i < nPacks; i++)
-					sum += Math.pow(pcks[i].latency() - latMean, 2);
-			return Math.sqrt(sum / nPacks);
+			for(Packet pck: pcks)
+				sum += Math.pow(pck.latency() - latMean, 2);
+			return Math.sqrt(sum / pcks.size());
 		}
 		return -1.0;
 	}
 
 	private double latencyMax() // máxima
 	{
-		double latMax = 0;
-		for (int i = 0; i < nPacks; i++)
-			if (pcks[i].latency() > latMax)
-				latMax = pcks[i].latency();
-		return latMax;
+		return lat[2];
 	}
 
 	private double latencyMin() // mínima
 	{
-		double latMin = Double.POSITIVE_INFINITY;
-		for (int i = 0; i < nPacks; i++)
-			if (pcks[i].latency() < latMin)
-				latMin = pcks[i].latency();
-		return latMin;
+		return lat[0];
 	}
 
 	// Latências Normalizadas
@@ -282,7 +279,7 @@ public class Evaluation {
 	 * }
 	 * 
 	 * public double latencyNAcc(  ) // acumulada { int latAcc = 0; for(
-	 * int i = 0; i < nPacks; i++ ) if ( pcks[i].isType(  ) ) latAcc +=
+	 * int i = 0; i < pcks.length; i++ ) if ( pcks[i].isType(  ) ) latAcc +=
 	 * latencyN( pcks[i] ); return latAcc; }
 	 * 
 	 * public double latencyNMean(  ) // média { int nPck = getNPck(
@@ -290,28 +287,30 @@ public class Evaluation {
 	 * 
 	 * public double latencyNStdDev(  ) // desvio padrão { int nPck =
 	 * getNPck(  ); if ( nPck != 0 ) { double latNMean = latencyNMean( 
-	 * ); double sum = 0; for( int i = 0; i < nPacks; i++) if ( pcks[i].isType(
+	 * ); double sum = 0; for( int i = 0; i < pcks.length; i++) if ( pcks[i].isType(
 	 * tipo ) ) sum += Math.pow( latencyN( pcks[i] ) - latNMean , 2 ); return
 	 * Math.sqrt( sum / nPck ); } return -1.0; }
 	 * 
 	 * public double latencyNMax(  ) // máxima { double latNMax = 0; for
-	 * ( int i = 0; i < nPacks; i++ ) if ( pcks[i].isType( tipo ) && ( latencyN(
+	 * ( int i = 0; i < pcks.length; i++ ) if ( pcks[i].isType( tipo ) && ( latencyN(
 	 * pcks[i] ) > latNMax ) ) latNMax = latencyN( pcks[i] ); return latNMax; }
 	 * 
 	 * public double latencyNMin(  ) // mínima { double latNMin =
-	 * latencyNAcc( tipo ); for( int i = 0; i < nPacks; i++ ) if (
+	 * latencyNAcc( tipo ); for( int i = 0; i < pcks.length; i++ ) if (
 	 * pcks[i].isType( tipo ) && ( latencyN( pcks[i] ) < latNMin ) ) latNMin =
 	 * latencyN( pcks[i] ); return latNMin; }
 	 */
 	// Tráfegos Aceitos
 
+	/*
 	private double getAccepTraffAcc() // acumulado
 	{
 		double accepTraffAcc = 0;
-		for (int i = 0; i < nPacks; i++)
+		for (int i = 0; i < pcks.length; i++)
 			accepTraffAcc += pcks[i].accepTraffic();
 		return accepTraffAcc;
 	}
+	*/
 
 	/*
 	private double getAccepTraffAcc(int Xs, int Ys) // acumulado para
@@ -319,7 +318,7 @@ public class Evaluation {
 																// origem
 	{
 		double accepTraffAcc = 0;
-		for (int i = 0; i < nPacks; i++)
+		for (int i = 0; i < pcks.length; i++)
 			if (pcks[i].getXs() == Xs
 					&& pcks[i].getYs() == Ys)
 				accepTraffAcc += pcks[i].getAccepTraff();
@@ -337,37 +336,29 @@ public class Evaluation {
 
 	public double getAccepTraffMean() // média
 	{
-		return (nPacks != 0) ? getAccepTraffAcc() / (double) nPacks : -1.0;
+		return accTraffic[1];
 	}
 
 	private double getAccepTraffStdDev() // desvio padrão
 	{
-		if (nPacks != 0) {
-			double accepTraffMean = getAccepTraffMean();
+		if (pcks.size() != 0) {
+			double accepTraffMean = accTraffic[1];
 			double sum = 0;
-			for (int i = 0; i < nPacks; i++)
-					sum += Math.pow(pcks[i].accepTraffic() - accepTraffMean, 2);
-			return Math.sqrt(sum / (double) nPacks);
+			for(Packet pck: pcks)
+					sum += Math.pow(pck.accepTraffic() - accepTraffMean, 2);
+			return Math.sqrt(sum / (double) pcks.size());
 		}
 		return -1.0;
 	}
 
 	private double getAccepTraffMax() // máximo
 	{
-		double accepTraffMax = 0;
-		for (int i = 0; i < nPacks; i++)
-			if ((pcks[i].accepTraffic() > accepTraffMax))
-				accepTraffMax = pcks[i].accepTraffic();
-		return accepTraffMax;
+		return accTraffic[2];
 	}
 
 	private double getAccepTraffMin() // mínimo
 	{
-		double accepTraffMin = Double.POSITIVE_INFINITY;
-		for (int i = 0; i < nPacks; i++)
-			if ((pcks[i].accepTraffic() < accepTraffMin))
-				accepTraffMin = pcks[i].accepTraffic();
-		return accepTraffMin;
+		return accTraffic[0];
 	}
 
 }
