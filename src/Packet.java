@@ -1,3 +1,5 @@
+import java.util.Comparator;
+
 
 public class Packet implements Comparable<Packet> {
 	private int size;
@@ -58,4 +60,29 @@ public class Packet implements Comparable<Packet> {
 		String s = "#"+id+": "+source+"->"+target+", lat: "+latency+" accTraf: "+accepTraffic+", tpfext: "+tpflext;
 		return s;
 	}
+	
+	public static class ByLatency implements Comparator<Packet> {
+
+		@Override
+		public int compare(Packet pack0, Packet pack1) {
+			// TODO Auto-generated method stub
+			if(pack0.latency < pack1.latency) return -1;
+			if(pack0.latency > pack1.latency) return +1;
+			return 0;
+		}
+		
+	}
+	
+	public static class ByAcceptedTraffic implements Comparator<Packet> {
+
+		@Override
+		public int compare(Packet pack0, Packet pack1) {
+			// TODO Auto-generated method stub
+			if(pack0.accepTraffic < pack1.accepTraffic) return -1;
+			if(pack0.accepTraffic > pack1.accepTraffic) return +1;
+			return 0;
+		}
+		
+	}
+
 }

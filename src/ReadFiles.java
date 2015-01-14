@@ -4,7 +4,6 @@ public class ReadFiles {
 
 	private Scanner file;
 	private ArrayList<Packet> pcks = new ArrayList<Packet>();
-	//private Map<String, Integer> nRetranspFLuxs = new HashMap<String, Integer>();
 	private String path;
 	private double[] lat = {Double.POSITIVE_INFINITY, 0, Double.NEGATIVE_INFINITY};
 	private double[] accTraffic = {Double.POSITIVE_INFINITY, 0, Double.NEGATIVE_INFINITY};
@@ -16,10 +15,7 @@ public class ReadFiles {
 
 	public ArrayList<Packet> read() {
 
-		String[] listfiles; // files contem os arquivos do path
-
-		listfiles = HandleFiles.getFilepaths(path); // Lista todos os arquivos
-													// de um diretorio
+		String[] listfiles = HandleFiles.getFilepaths(path); // Lista todos os arquivos
 		
 		lat[1] = 0;
 		for (int numbfiles = 0; numbfiles < listfiles.length; numbfiles++) {
@@ -46,7 +42,6 @@ public class ReadFiles {
 				acceptedTraffic = (double)act.size()/(next.tpfext()-act.tpfext());
 			act.setAccepTraffic(acceptedTraffic);
 			
-			System.out.println(act);
 			accTraffic[0] = (acceptedTraffic < accTraffic[0]) ? acceptedTraffic : accTraffic[0];
 			accTraffic[1] += acceptedTraffic;
 			accTraffic[2] = (acceptedTraffic > accTraffic[2]) ? acceptedTraffic : accTraffic[2];
@@ -56,10 +51,7 @@ public class ReadFiles {
 		accTraffic[1] /= (double)pcks.size();
 		lat[1] /= (double)pcks.size();
 
-		//Packet[] Aux = pcks.toArray(new Packet[0]);
-		//return Aux;
 		return pcks;
-
 	}
 
 	private Packet ReadOnePacket() {
@@ -90,18 +82,11 @@ public class ReadFiles {
 		String target = tX + "." + tY;
 		String source = sX + "." + sY;
 
-		// System.out.println("Target: " + target + " Source: " + source);
 		Packet pck = new Packet(target, size, source, Latency, Tpflext, id);
 
 		return pck;
 	}
 
-	/*
-	public Map<String, Integer> getnRetranspFluxs() {
-		return this.nRetranspFLuxs;
-	}
-	*/
-	
 	public double[] latStats() {
 		return lat;
 	}
