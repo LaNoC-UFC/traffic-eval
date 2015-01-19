@@ -1,53 +1,80 @@
-/*
-	23/09/11 - Rafael Mota
-	26/09/11 - George Harinson
-	05/10/11 - João Marcelo
- */
+
 import java.io.*;
 
-public class TrafficMeasurer 
-{
-    public static void main(String[] args) 
-	{
-		//passar pathN1, dimX e dimY pela linha de comando
-    	String path = null;
-    	if(args.length == 1)
-    	{
-    		path = "./"+args[0];
-    	}
-    	else
-    	{
-    		path = "./evaluate";
-    	}	
-    	//path = "./evaluate";
-                //E:\Marcelo\TestesFev12\ResultadosFev12
-		int dimX = 5;
-		int dimY = 5;
-		/*for( int i = 0; i < traffics.length; i++ )
-		{
-			String pathN2 = pathN1 + "//" + traffics[i];
-			File folderN2 = new File( pathN2 );
-			String[] topologies = folderN2.list();
-			for( int j = 0; j < topologies.length; j++ )
-			{*/
-				//String pathN3 = "C://Users//GpNoC//Dropbox//Pasta Pessoal//TCC//evaluate";
-				File folderN3 = new File( path );
-				new File("./results").mkdirs();
-				String graphsPath = "./results"; 
-				
-				String[] nets = folderN3.list();
-				for( int k = 0; k < nets.length; k++)
-				{
-					String pathN4 = path + "//" + nets[k];
-                    System.out.println( pathN4 );
-					Evaluation eval;
-					eval = new Evaluation( nets[k], pathN4,graphsPath, dimX, dimY);
-					eval.makeCNFs();
-					//eval.plotCNFs();
-					eval.printRetrans();
-				}
-			//}
-		//}
-    //}
+public class TrafficMeasurer {
+	private Evaluation[] OL; // cada uma das cargas oferecidas
+	private String rede; // nome da rede
+	private String graphsPath;
+
+	public static void main(String[] args) {
+		String path = "./evaluate";
+		
+		if (args.length == 1) {
+			path = "./" + args[0];
+		}
+		
+		System.out.println("Evaluating traffic from " + path);
+		TrafficMeasurer eval = new TrafficMeasurer("", path, path);
+		eval.makeCNFs();
+		eval.genHistograms();
+		eval.makeRelats();
+	}
+
+	public TrafficMeasurer(String nome, String pathTst, String graphsPath) {
+		this.graphsPath = graphsPath;
+		this.rede = nome;
+		File folder = new File(pathTst);
+		String[] pathOL = folder.list();
+		// aloca OL
+		OL = new Evaluation[pathOL.length];
+		// aloca e inicializa cada OL[i]
+		for (int i = 0; i < OL.length; i++)
+			OL[i] = new Evaluation(pathTst, graphsPath, rede, pathOL[i], rede);
+	}
+
+	public void genHistograms() {
+		for (Evaluation e : OL) {
+			e.makeHistLat();
+			e.makeHistAccepTraff();
+		}
+	}
+
+	/* Gera o arquivo para a confecção do CNF de Latência */
+	private void makeCNFLat() {
+		double offerload[] = new double[OL.length];
+		double latmean[] = new double[OL.length];
+		for (int i = 0; i < OL.length; i++) {
+			offerload[i] = OL[i].OfferedLoad() / 100.0;
+			latmean[i] = OL[i].latencyMean();
+		}
+		HandleFiles.WriteFile(graphsPath + "//result" + rede + "//", "CNF_Lat",
+				offerload, latmean, OL.length);
+	}
+
+	/* Gera o arquivo para a confecção do CNF de Tráfego Aceito */
+	private void makeCNFAccepTraff() {
+		double offerload[] = new double[OL.length];
+		double accepTraffmean[] = new double[OL.length];
+		for (int i = 0; i < OL.length; i++) {
+			offerload[i] = OL[i].OfferedLoad() / 100.0;
+			accepTraffmean[i] = OL[i].getAccepTraffMean();
+		}
+		HandleFiles.WriteFile(graphsPath + "//result" + rede + "//", "CNF_AT",
+				offerload, accepTraffmean, OL.length);
+	}
+
+	/* Gera os arquivos para a confecção dos CNF's de um determinado tipo */
+	public void makeCNFs() {
+		File dir = new File(graphsPath + "//result" + rede);
+		dir.mkdir();
+
+		makeCNFAccepTraff();
+		makeCNFLat();
+	}
+
+	/* Gera os relatórios de cada subteste */
+	public void makeRelats() {
+		for (int i = 0; i < OL.length; i++)
+			OL[i].makeRelat();
 	}
 }

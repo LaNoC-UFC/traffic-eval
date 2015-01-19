@@ -1,146 +1,88 @@
-/*
-	23/09/11 - Rafael Mota
-	26/09/11 - George Harinson
-	05/10/11 - João Marcelo
- */
+import java.util.Comparator;
 
-public class Packet 
-{
-    int size;
-    double latency;
-    double accepTraffic;
-	int priority;
-    String source;
-    String target;
-    double tpflext;
-    String net;
-	String[] flux = new String[2]; //[0]-src [1]-dst
-    
-	public String[] getflux()
-	{
-		return flux;
+
+public class Packet implements Comparable<Packet> {
+	private int size;
+	private double latency;
+	private double accepTraffic;
+	private double tpflext;
+	private String source;
+	private String target;
+	private int id;
+
+	public Packet(String target, int size, String source, double latency,
+			double tpflext, int id) {
+		this.size = size+2;
+		this.latency = latency;
+		this.source = source;
+		this.target = target;
+		this.tpflext = tpflext;
+		this.id = id;
+	}
+
+	public double latency() {
+		return latency;
+	}
+
+	public int size() {
+		return size;
+	}
+
+	public double tpfext() {
+		return tpflext;
 	}
 	
-    public int getXt()
-	{
-		return Integer.parseInt( target.substring(2,3) );
+	public String src() {
+		return source;
 	}
-    
 
-    public int getXs()
-	{
-		return Integer.parseInt( source.substring(2,3) );
+	public String dst() {
+		return target;
 	}
-	
-    public int getYt()
-	{
-		return Integer.parseInt( target.substring(3,4) );
+
+	public double accepTraffic() {
+		return accepTraffic;
 	}
-	
-    
-    public int getYs()
-	{
-		return Integer.parseInt( source.substring(3,4) );
+
+	public void setAccepTraffic(double acceptraffic) {
+		this.accepTraffic = acceptraffic;
 	}
-    
-    public double getLat() 
-	{
-        return latency;
-    }
 
-    public int getPriority() 
-	{
-        return priority;
-    }
+	@Override
+	public int compareTo(Packet that) {
+		if(this.id < that.id) return -1;
+		if(this.id > that.id) return +1;
+		return 0;
+	}
 
-    public int getSize() 
-	{
-        return size;
-    }
-
-    public String getSource() 
-	{
-        return source;
-    }
-
-    public String getTarget() 
-	{
-        return target;
-    }
-    
-    public double getTpflext() 
-	{
-        return tpflext;
-    }
-    
-    public double getAccepTraff()
-	{
-        return accepTraffic;
-    }
-	
-    
-    /*public void setLatency(double latency) 
-	{
-        this.latency = latency;
-    }*/
-
-	public void setFlux(String src, String dst)
-	{
-		this.flux[0]=src;
-		this.flux[1]=dst;
+	@Override
+	public String toString() {
+		String s = "#"+id+": "+source+"->"+target+", lat: "+latency+" accTraf: "+accepTraffic+", tpfext: "+tpflext;
+		return s;
 	}
 	
-    public void setPriority(int priority) 
-	{
-        this.priority = priority;
-    }
-    
-    public void setSource(String source) 
-	{
-        this.source = source;
-    }
+	public static class ByLatency implements Comparator<Packet> {
 
-    public void setTarget(String target) 
-	{
-        this.target = target;
-    }
-    
-    public void setAccepTraffic(double tpflext1)
-	{           
-        this.accepTraffic = ((double)this.size+2)/(tpflext1 - this.tpflext);
-    }
-    
-    public void setLastAccepTraffic(double acceptraffic)	
-    {           
-        this.accepTraffic = acceptraffic;   
-    }
-    
-    public Packet(String target, int size, String source, double latency, double tpflext) 
-	{   
-        this.size = size;
-        this.latency = latency;
-        this.priority = Integer.parseInt(target.substring(0, 1));
-        this.source = source;
-        this.target = target;
-        this.tpflext = tpflext;
-    }
-
-    //Verifica se o pacote é de um tipo especificado
-       public boolean isType(char type)
-	{
-        //H ou h alta prioridade, L ou l baixa prioridade else indiferente
-        // Se não for H nem L retornará false  
-        if ( type == 'H' || type =='h' )
-		{
-			return this.getPriority() == 1;
+		@Override
+		public int compare(Packet pack0, Packet pack1) {
+			// TODO Auto-generated method stub
+			if(pack0.latency < pack1.latency) return -1;
+			if(pack0.latency > pack1.latency) return +1;
+			return 0;
 		}
-		else if ( type == 'L' || type == 'l' )
-		{
-			return this.getPriority() == 0;
+		
+	}
+	
+	public static class ByAcceptedTraffic implements Comparator<Packet> {
+
+		@Override
+		public int compare(Packet pack0, Packet pack1) {
+			// TODO Auto-generated method stub
+			if(pack0.accepTraffic < pack1.accepTraffic) return -1;
+			if(pack0.accepTraffic > pack1.accepTraffic) return +1;
+			return 0;
 		}
-		else
-			return true;
-    }
-    
-    
+		
+	}
+
 }
