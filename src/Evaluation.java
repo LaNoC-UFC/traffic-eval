@@ -7,16 +7,16 @@ public class Evaluation {
 	private int OL; // carga oferecida
 	private String strOL;
 	private String path; // caminho do teste
-	private String graphsPath;
+	private String outPath;
 	private int nDot = 30; // quantidade de pontos do histograma
 	private double[] lat;
 	private double[] accTraffic;
 
-	public Evaluation(String pathTst, String graphsPath, String rede,
+	public Evaluation(String inPath, String outPath, String rede,
 			String offerLoad, String net) {
 		this.strOL = offerLoad;
-		this.graphsPath = graphsPath;
-		this.path = pathTst + "//" + offerLoad;
+		this.outPath = outPath;
+		this.path = inPath + "//" + offerLoad;
 		this.OL = Integer.parseInt(offerLoad.substring(1));
 		ReadFiles read = new ReadFiles(path);
 		this.pcks = read.read();
@@ -37,7 +37,7 @@ public class Evaluation {
 			if(pck.latency() <= lats[i]) nPcks[i]++;
 			else if(++i < nDot) nPcks[i]++;
 
-		HandleFiles.WriteFile(graphsPath + "//", "ED_Lat" + strOL, nPcks, lats, nDot);
+		HandleFiles.WriteFile(outPath + "//", "ED_Lat" + strOL, nPcks, lats, nDot);
 	}
 
 	/*
@@ -56,7 +56,7 @@ public class Evaluation {
 			if(pck.accepTraffic() <= accepTraffs[i]) nPcks[i]++;
 			else if(++i < nDot) nPcks[i]++;
 
-		HandleFiles.WriteFile(graphsPath + "//", "ED_AT" + strOL, nPcks, accepTraffs, nDot);
+		HandleFiles.WriteFile(outPath + "//", "ED_AT" + strOL, nPcks, accepTraffs, nDot);
 	}
 
 	/* Escreve arquivo de relatório */
@@ -77,7 +77,7 @@ public class Evaluation {
 					+ getAccepTraffStdDev() + " : " + getAccepTraffMax()
 					+ "]";
 
-			HandleFiles.WriteFile(graphsPath + "//", "Relatorio" + strOL, Relat);
+			HandleFiles.WriteFile(outPath + "//", "Relatorio" + strOL, Relat);
 	}
 
 	/* geta a carga oferecida do subteste */
