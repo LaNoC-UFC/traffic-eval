@@ -1,138 +1,142 @@
+import java.util.ArrayList;
+import java.util.Collections;
 
-import java.io.*;
 
 public class Evaluation {
-	private SubEvaluation[] OL; // cada uma das cargas oferecidas
-	private int nOL; // quantidade de cargas oferecidas
-	private String rede; // nome da rede
-	// private String trafficDistri; // distribuição espacial do tráfego adotada
-	private String pathTst; // path do teste
-	private String[] pathOL; // path das cargas oferecidas
-	private int dimX; // tamanho da rede no eixo X
-	private int dimY; // tamanho da rede no eixo Y
-	//private String topology; // topologia da rede
-	private String graphsPath;
+	private ArrayList<Packet> pcks;
+	private int OL; // carga oferecida
+	private String strOL;
+	private String path; // caminho do teste
+	private String outPath;
+	private int nDot = 30; // quantidade de pontos do histograma
+	private double[] lat;
+	private double[] accTraffic;
 
-	public Evaluation(String nome, String pth, String graphsPath, int dX, int dY) {
-		this.graphsPath = graphsPath;
-		// dimensões da rede
-		this.dimX = dX;
-		this.dimY = dY;
-		// topologia da rede
-		//this.topology = "MESH";
-		// nome da rede
-		this.rede = nome;
-		// path principal
-		pathTst = pth;
-		// lista pastas (subtestes)
-		File folder = new File(pathTst);
-		pathOL = folder.list();
-		// seta quantidade de subtestes
-		nOL = pathOL.length;
-		// aloca OL
-		OL = new SubEvaluation[nOL];
-		// aloca e inicializa cada OL[i]
-		for (int i = 0; i < nOL; i++)
-			OL[i] = new SubEvaluation(pathTst, graphsPath, rede, pathOL[i],
-					dimX, dimY, rede);
+	public Evaluation(String inPath, String outPath, String rede,
+			String offerLoad, String net) {
+		this.strOL = offerLoad;
+		this.outPath = outPath;
+		this.path = inPath + "//" + offerLoad;
+		this.OL = Integer.parseInt(offerLoad.substring(1));
+		ReadFiles read = new ReadFiles(path);
+		this.pcks = read.read();
+		lat = read.latStats();
+		accTraffic = read.accTrafficStats();
 	}
 
-	/* gera os arquivos 'Distribuição espacial' de um determinado tipo */
+	/* Gera o arquivo para a confecção do Distribuição Espacial da Latência Pura */
+	public void makeHistLat() {
+		int nPcks[] = new int[nDot]; // contém as quantidades pacotes
+		double lats[] = new double[nDot]; // contém as latências distintas
+		double step = (this.latencyMax() + this.latencyMin()) / (double) nDot;
+		for(int i = 0; i < nDot; i++)
+			lats[i] = (double)(i+1)*step;
+		Collections.sort(pcks, new Packet.ByLatency());
+		int i = 0;
+		for(Packet pck: pcks)
+			if(pck.latency() <= lats[i]) nPcks[i]++;
+			else if(++i < nDot) nPcks[i]++;
+
+		HandleFiles.WriteFile(outPath + "//", "ED_Lat" + strOL, nPcks, lats, nDot);
+	}
+
 	/*
-	public void makeDistris() {
-		for (int i = 0; i < nOL; i++) {
-			OL[i].makeSpatDistriLat();
-			// OL[i].makeSpatDistriLatN( tipo );
-			OL[i].makeSpatDistriAccepTraff();
-			OL[i].makeHistogramAccepTraff();
-			// OL[i].printRetransmissions();
+	 * Gera o arquivo para a confecção do Distribuição Espacial do Tráfego
+	 * Aceito
+	 */
+	public void makeHistAccepTraff() {
+		int nPcks[] = new int[nDot]; // contém as quantidades pacotes
+		double accepTraffs[] = new double[nDot];
+		double step = (this.getAccepTraffMax()+this.getAccepTraffMin()) / (double) nDot;
+		for (int i = 1; i < nDot; i++)
+			accepTraffs[i] = (double)(i+1)*step;
+		Collections.sort(pcks, new Packet.ByAcceptedTraffic());
+		int i = 0;
+		for(Packet pck: pcks)
+			if(pck.accepTraffic() <= accepTraffs[i]) nPcks[i]++;
+			else if(++i < nDot) nPcks[i]++;
+
+		HandleFiles.WriteFile(outPath + "//", "ED_AT" + strOL, nPcks, accepTraffs, nDot);
+	}
+
+	/* Escreve arquivo de relatório */
+	public void makeRelat() {
+		String[] Relat = new String[4];
+		int i = 0;
+		// nome da rede - tipo de tráfego - carga oferecida
+		Relat[i++] = " - " + OL + "%";
+		// porcentagem de alta e baixa prioridade
+		Relat[i++] = "Quantidade total de pacotes:  " + pcks.size();
+			// latência pura: média+-desvio / [máximo,mínimo]
+			Relat[i++] = "Latencia Total:  [" + latencyMin() + " : "
+					+ latencyMean() + "/" + latencyStdDev() + " : "
+					+ latencyMax() + "]";
+			// tráfego aceito: média+-desvio / [máximo,mínimo]
+			Relat[i++] = "Trafego Aceito Total:  [" + getAccepTraffMin()
+					+ " : " + getAccepTraffMean() + "/"
+					+ getAccepTraffStdDev() + " : " + getAccepTraffMax()
+					+ "]";
+
+			HandleFiles.WriteFile(outPath + "//", "Relatorio" + strOL, Relat);
+	}
+
+	/* geta a carga oferecida do subteste */
+	public int OfferedLoad() {
+		return OL;
+	}
+
+	public double latencyMean() // média
+	{
+		return lat[1];
+	}
+
+	private double latencyStdDev() // desvio padrão
+	{
+		if (pcks.size() != 0) {
+			double latMean = lat[1];
+			double sum = 0;
+			for(Packet pck: pcks)
+				sum += Math.pow(pck.latency() - latMean, 2);
+			return Math.sqrt(sum / pcks.size());
 		}
+		return -1.0;
 	}
-	*/
 
-	/*
-	 * public void plotDistris( char tipo ) { for( int i = 0; i < nOL; i++ ) {
-	 * OL[i].plotSpatDistriLat( tipo ); OL[i].plotSpatDistriLatN( tipo );
-	 * OL[i].plotSpatDistriAccepTraff( tipo ); OL[i].plotSpatDistriAccepTraff3D(
-	 * tipo ); } }
-	 * 
-	 * public void plotDistris() { boolean H = false; for( int i = 0; i < nOL;
-	 * i++ ) if( OL[i].getNPck( 'H' ) != 0 ) { H = true; break; } if( H == true
-	 * ) { plotDistris( 'T' ); plotDistris( 'H' ); plotDistris( 'L' ); } else
-	 * plotDistris( 'T' ); }
-	 */
+	private double latencyMax() // máxima
+	{
+		return lat[2];
+	}
 
-	/* Gera o arquivo para a confecção do CNF de Latência Pura */
-	private void makeCNFLat() {
-		double offerload[] = new double[nOL];
-		double latmean[] = new double[nOL];
-		for (int i = 0; i < nOL; i++) {
-			offerload[i] = OL[i].OfferedLoad() / 100.0;
-			latmean[i] = OL[i].latencyMean();
+	private double latencyMin() // mínima
+	{
+		return lat[0];
+	}
+
+	public double getAccepTraffMean() // média
+	{
+		return accTraffic[1];
+	}
+
+	private double getAccepTraffStdDev() // desvio padrão
+	{
+		if (pcks.size() != 0) {
+			double accepTraffMean = accTraffic[1];
+			double sum = 0;
+			for(Packet pck: pcks)
+					sum += Math.pow(pck.accepTraffic() - accepTraffMean, 2);
+			return Math.sqrt(sum / (double) pcks.size());
 		}
-		HandleFiles.WriteFile(graphsPath + "//result_" + rede + "//", "CNF_Lat",
-				offerload, latmean, nOL);
+		return -1.0;
 	}
 
-	/* Gera o arquivo para a confecção do CNF de Latência Normalizada */
-	/*
-	 * public void makeCNFLatN( char tipo ) { double offerload[] = new double[
-	 * nOL ]; double latNmean[] = new double[ nOL ]; for( int i = 0; i < nOL;
-	 * i++ ) { offerload[i] = OL[i].getOL()/100.0; latNmean[i] =
-	 * OL[i].getLatNMean( tipo ); } HandleFiles hand = new HandleFiles();
-	 * hand.WriteFile( graphsPath + "//", "CNF_Latn" + tipo+rede, offerload,
-	 * latNmean, nOL ); }
-	 */
-
-	/* Gera o arquivo para a confecção do CNF de Tráfego Aceito */
-	private void makeCNFAccepTraff() {
-		double offerload[] = new double[nOL];
-		double accepTraffmean[] = new double[nOL];
-		for (int i = 0; i < nOL; i++) {
-			offerload[i] = OL[i].OfferedLoad() / 100.0;
-			accepTraffmean[i] = OL[i].getAccepTraffMean();
-		}
-		HandleFiles.WriteFile(graphsPath + "//result_" + rede + "//", "CNF_AT",
-				offerload, accepTraffmean, nOL);
+	private double getAccepTraffMax() // máximo
+	{
+		return accTraffic[2];
 	}
 
-	/* Gera os arquivos para a confecção dos CNF's de um determinado tipo */
-	public void makeCNFs() {
-		File dir = new File(graphsPath + "//result_" + rede);
-		dir.mkdir();
-
-		makeCNFLat();
-		makeCNFAccepTraff();
+	private double getAccepTraffMin() // mínimo
+	{
+		return accTraffic[0];
 	}
 
-	/*
-	 * public void plotCNFLat( char tipo ) { PlotGraphics.plotCNF_Lat(
-	 * graphsPath + "//result_"+rede+"//", "CNF_Lat", rede ); }
-	 * 
-	 * public void plotCNFLatN( char tipo ) { PlotGraphics.plotCNF_LatN(
-	 * graphsPath + "//", "CNF_Latn" + tipo+rede, rede ); }
-	 * 
-	 * public void plotCNFAccepTraff( char tipo ) { PlotGraphics.plotCNF_AT(
-	 * graphsPath + "//result_"+rede+"//", "CNF_AT", rede ); }
-	 * 
-	 * public void plotCNFs( char tipo ) { plotCNFLat( tipo ); //plotCNFLatN(
-	 * tipo ); plotCNFAccepTraff( tipo ); }
-	 */
-	/*
-	 * public void printRetrans() { for( int i = 0; i < nOL; i++ ) {
-	 * OL[i].printRetransmissions(graphsPath);
-	 * 
-	 * } }
-	 */
-	/*
-	 * public void plotCNFs() { boolean high = false; for( int i = 0; i < nOL;
-	 * i++ ) if( OL[i].getNPck( 'H' ) != 0) { high = true; break; } if ( high ==
-	 * true ) { plotCNFs( 'T' ); plotCNFs( 'H' ); plotCNFs( 'L' ); } else
-	 * plotCNFs( 'T' ); }
-	 */
-	/* Gera os relatórios de cada subteste */
-	public void makeRelats() {
-		for (int i = 0; i < nOL; i++)
-			OL[i].makeRelat();
-	}
 }

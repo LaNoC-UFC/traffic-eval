@@ -1,63 +1,43 @@
+import java.util.Comparator;
 
-public class Packet {
+
+public class Packet implements Comparable<Packet> {
 	private int size;
 	private double latency;
 	private double accepTraffic;
 	private double tpflext;
-	/*
 	private String source;
 	private String target;
-	private String[] flux = new String[2]; // [0]-src [1]-dst
-	*/
+	private int id;
+
 	public Packet(String target, int size, String source, double latency,
-			double tpflext) {
-		this.size = size;
+			double tpflext, int id) {
+		this.size = size+2;
 		this.latency = latency;
-		//this.source = source;
-		//this.target = target;
+		this.source = source;
+		this.target = target;
 		this.tpflext = tpflext;
+		this.id = id;
 	}
-
-	/*
-	private String[] getflux() {
-		return flux;
-	}
-
-	private int getXt() {
-		return Integer.parseInt(target.substring(2, 3));
-	}
-
-	private int getXs() {
-		return Integer.parseInt(source.substring(2, 3));
-	}
-
-	private int getYt() {
-		return Integer.parseInt(target.substring(3, 4));
-	}
-
-	private int getYs() {
-		return Integer.parseInt(source.substring(3, 4));
-	}
-
-	private String getSource() {
-		return source;
-	}
-
-	private String getTarget() {
-		return target;
-	}
-	*/
 
 	public double latency() {
 		return latency;
 	}
 
 	public int size() {
-		return size+2;
+		return size;
 	}
 
-	public double getTpflext() {
+	public double tpfext() {
 		return tpflext;
+	}
+	
+	public String src() {
+		return source;
+	}
+
+	public String dst() {
+		return target;
 	}
 
 	public double accepTraffic() {
@@ -68,25 +48,41 @@ public class Packet {
 		this.accepTraffic = acceptraffic;
 	}
 
-	/*
-	 * public void setLatency(double latency) { this.latency = latency; }
-
-	private void setFlux(String src, String dst) {
-		this.flux[0] = src;
-		this.flux[1] = dst;
+	@Override
+	public int compareTo(Packet that) {
+		if(this.id < that.id) return -1;
+		if(this.id > that.id) return +1;
+		return 0;
 	}
 
-	private void setSource(String source) {
-		this.source = source;
+	@Override
+	public String toString() {
+		String s = "#"+id+": "+source+"->"+target+", lat: "+latency+" accTraf: "+accepTraffic+", tpfext: "+tpflext;
+		return s;
+	}
+	
+	public static class ByLatency implements Comparator<Packet> {
+
+		@Override
+		public int compare(Packet pack0, Packet pack1) {
+			// TODO Auto-generated method stub
+			if(pack0.latency < pack1.latency) return -1;
+			if(pack0.latency > pack1.latency) return +1;
+			return 0;
+		}
+		
+	}
+	
+	public static class ByAcceptedTraffic implements Comparator<Packet> {
+
+		@Override
+		public int compare(Packet pack0, Packet pack1) {
+			// TODO Auto-generated method stub
+			if(pack0.accepTraffic < pack1.accepTraffic) return -1;
+			if(pack0.accepTraffic > pack1.accepTraffic) return +1;
+			return 0;
+		}
+		
 	}
 
-	private void setTarget(String target) {
-		this.target = target;
-	}
-
-	private void setLastAccepTraffic(double acceptraffic) {
-		this.accepTraffic = acceptraffic;
-	}
-
-	 */
 }
