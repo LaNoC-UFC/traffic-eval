@@ -8,8 +8,8 @@ public class Evaluation {
 	private String path; // caminho do teste
 	private String outPath;
 	private int nDot = 30; // quantidade de pontos do histograma
-	private double[] lat;
-	private double[] accTraffic;
+	private List<Double> latencies;
+	private List<Double> accTraffics;
 
 	public Evaluation(String inPath, String outPath, String rede,
 			String offerLoad, String net) {
@@ -19,8 +19,8 @@ public class Evaluation {
 		this.OL = Integer.parseInt(offerLoad.substring(1));
 		ReadFiles read = new ReadFiles(path);
 		this.pcks = read.read();
-		lat = read.latStats();
-		accTraffic = read.accTrafficStats();
+		latencies = read.latencies();
+		accTraffics = read.accTraffics();
 	}
 
 	/* Gera o arquivo para a confecção do Distribuição Espacial da Latência Pura */
@@ -46,7 +46,7 @@ public class Evaluation {
 	public void makeHistAccepTraff() {
 		int nPcks[] = new int[nDot]; // contém as quantidades pacotes
 		double accepTraffs[] = new double[nDot];
-		double step = (this.getAccepTraffMax()+this.getAccepTraffMin()) / (double) nDot;
+		double step = (this.accepTraffMax()+this.accepTraffMin()) / (double) nDot;
 		for (int i = 1; i < nDot; i++)
 			accepTraffs[i] = (double)(i+1)*step;
 		Collections.sort(pcks, new Package.ByAcceptedTrafficComparator());
@@ -68,12 +68,12 @@ public class Evaluation {
 		Relat[i++] = "Quantidade total de pacotes:  " + pcks.size();
 			// latência pura: média+-desvio / [máximo,mínimo]
 			Relat[i++] = "Latencia Total:  [" + latencyMin() + " : "
-					+ latencyMean() + "/" + latencyStdDev() + " : "
+					+ averageLatency() + "/" + latencyStdDev() + " : "
 					+ latencyMax() + "]";
 			// tráfego aceito: média+-desvio / [máximo,mínimo]
-			Relat[i++] = "Trafego Aceito Total:  [" + getAccepTraffMin()
-					+ " : " + getAccepTraffMean() + "/"
-					+ getAccepTraffStdDev() + " : " + getAccepTraffMax()
+			Relat[i++] = "Trafego Aceito Total:  [" + accepTraffMin()
+					+ " : " + averageAccepTraff() + "/"
+					+ accepTraffStdDev() + " : " + accepTraffMax()
 					+ "]";
 
 			HandleFiles.writeToFile(outPath + File.pathSeparator + "Report" + strOL, Relat);
@@ -84,15 +84,15 @@ public class Evaluation {
 		return OL;
 	}
 
-	public double latencyMean() // média
+	public double averageLatency() // média
 	{
-		return lat[1];
+		return 0.0;
 	}
 
 	private double latencyStdDev() // desvio padrão
 	{
 		if (pcks.size() != 0) {
-			double latMean = lat[1];
+			double latMean = averageLatency();
 			double sum = 0;
 			for(Package pck: pcks)
 				sum += Math.pow(pck.latency() - latMean, 2);
@@ -103,23 +103,23 @@ public class Evaluation {
 
 	private double latencyMax() // máxima
 	{
-		return lat[2];
+		return 0.0;
 	}
 
 	private double latencyMin() // mínima
 	{
-		return lat[0];
+		return 0.0;
 	}
 
-	public double getAccepTraffMean() // média
+	public double averageAccepTraff() // média
 	{
-		return accTraffic[1];
+		return 0.0;
 	}
 
-	private double getAccepTraffStdDev() // desvio padrão
+	private double accepTraffStdDev() // desvio padrão
 	{
 		if (pcks.size() != 0) {
-			double accepTraffMean = accTraffic[1];
+			double accepTraffMean = averageLatency();
 			double sum = 0;
 			for(Package pck: pcks)
 					sum += Math.pow(pck.acceptedTraffic() - accepTraffMean, 2);
@@ -128,14 +128,14 @@ public class Evaluation {
 		return -1.0;
 	}
 
-	private double getAccepTraffMax() // máximo
+	private double accepTraffMax() // máximo
 	{
-		return accTraffic[2];
+		return 0.0;
 	}
 
-	private double getAccepTraffMin() // mínimo
+	private double accepTraffMin() // mínimo
 	{
-		return accTraffic[0];
+		return 0.0;
 	}
 
 }
