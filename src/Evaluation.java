@@ -27,7 +27,7 @@ public class Evaluation {
 	public void makeHistLat() {
 		int nPcks[] = new int[nDot]; // contém as quantidades pacotes
 		double lats[] = new double[nDot]; // contém as latências distintas
-		double step = (this.latencyMax() + this.latencyMin()) / (double) nDot;
+		double step = (Collections.max(latencies, null) + Collections.min(latencies, null)) / (double) nDot;
 		for(int i = 0; i < nDot; i++)
 			lats[i] = (double)(i+1)*step;
 		Collections.sort(pcks, new Package.ByLatencyComparator());
@@ -46,7 +46,7 @@ public class Evaluation {
 	public void makeHistAccepTraff() {
 		int nPcks[] = new int[nDot]; // contém as quantidades pacotes
 		double accepTraffs[] = new double[nDot];
-		double step = (this.accepTraffMax()+this.accepTraffMin()) / (double) nDot;
+		double step = (Collections.max(accTraffics, null) + Collections.min(accTraffics, null)) / (double) nDot;
 		for (int i = 1; i < nDot; i++)
 			accepTraffs[i] = (double)(i+1)*step;
 		Collections.sort(pcks, new Package.ByAcceptedTrafficComparator());
@@ -67,13 +67,13 @@ public class Evaluation {
 		// porcentagem de alta e baixa prioridade
 		Relat[i++] = "Quantidade total de pacotes:  " + pcks.size();
 			// latência pura: média+-desvio / [máximo,mínimo]
-			Relat[i++] = "Latencia Total:  [" + latencyMin() + " : "
+			Relat[i++] = "Latencia Total:  [" + Collections.min(latencies, null) + " : "
 					+ averageLatency() + "/" + latencyStdDev() + " : "
-					+ latencyMax() + "]";
+					+ Collections.max(latencies, null) + "]";
 			// tráfego aceito: média+-desvio / [máximo,mínimo]
-			Relat[i++] = "Trafego Aceito Total:  [" + accepTraffMin()
+			Relat[i++] = "Trafego Aceito Total:  [" + Collections.min(accTraffics, null)
 					+ " : " + averageAccepTraff() + "/"
-					+ accepTraffStdDev() + " : " + accepTraffMax()
+					+ accepTraffStdDev() + " : " + Collections.max(accTraffics, null)
 					+ "]";
 
 			HandleFiles.writeToFile(outPath + File.pathSeparator + "Report" + strOL, Relat);
@@ -86,7 +86,11 @@ public class Evaluation {
 
 	public double averageLatency() // média
 	{
-		return 0.0;
+		double accLatency = 0.0;
+		for(double latency : latencies) {
+			accLatency += latency;
+		}
+		return accLatency/latencies.size();
 	}
 
 	private double latencyStdDev() // desvio padrão
@@ -101,41 +105,25 @@ public class Evaluation {
 		return -1.0;
 	}
 
-	private double latencyMax() // máxima
-	{
-		return 0.0;
-	}
-
-	private double latencyMin() // mínima
-	{
-		return 0.0;
-	}
-
 	public double averageAccepTraff() // média
 	{
-		return 0.0;
+		double accAccTraffic = 0.0;
+		for(double accTraffic : accTraffics) {
+			accAccTraffic += accTraffic;
+		}
+		return accAccTraffic/accTraffics.size();
 	}
 
 	private double accepTraffStdDev() // desvio padrão
 	{
 		if (pcks.size() != 0) {
-			double accepTraffMean = averageLatency();
+			double accepTraffMean = averageAccepTraff();
 			double sum = 0;
 			for(Package pck: pcks)
 					sum += Math.pow(pck.acceptedTraffic() - accepTraffMean, 2);
 			return Math.sqrt(sum / (double) pcks.size());
 		}
 		return -1.0;
-	}
-
-	private double accepTraffMax() // máximo
-	{
-		return 0.0;
-	}
-
-	private double accepTraffMin() // mínimo
-	{
-		return 0.0;
 	}
 
 }
