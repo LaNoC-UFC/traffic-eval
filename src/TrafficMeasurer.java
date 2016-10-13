@@ -1,4 +1,3 @@
-
 import java.io.*;
 
 public class TrafficMeasurer {
@@ -68,7 +67,7 @@ public class TrafficMeasurer {
 			offerload[i] = OL[i].OfferedLoad() / 100.0;
 			latmean[i] = OL[i].latencyMean();
 		}
-		HandleFiles.WriteFile(outPath + rede + "//", "CNF_Lat", offerload, latmean, OL.length);
+		HandleFiles.writeToFile(outPath + rede + File.pathSeparator + "CNF_Lat", offerload, latmean);
 	}
 
 	/* Gera o arquivo para a confecção do CNF de Tráfego Aceito */
@@ -79,7 +78,7 @@ public class TrafficMeasurer {
 			offerload[i] = OL[i].OfferedLoad() / 100.0;
 			accepTraffmean[i] = OL[i].getAccepTraffMean();
 		}
-		HandleFiles.WriteFile(outPath + rede + "//", "CNF_AT", offerload, accepTraffmean, OL.length);
+		HandleFiles.writeToFile(outPath + rede + File.pathSeparator + "CNF_AT", offerload, accepTraffmean);
 	}
 
 }

@@ -1,6 +1,5 @@
-import java.util.ArrayList;
-import java.util.Collections;
-
+import java.io.File;
+import java.util.*;
 
 public class Evaluation {
 	private ArrayList<Packet> pcks;
@@ -16,7 +15,7 @@ public class Evaluation {
 			String offerLoad, String net) {
 		this.strOL = offerLoad;
 		this.outPath = outPath;
-		this.path = inPath + "//" + offerLoad;
+		this.path = inPath + File.pathSeparator + offerLoad;
 		this.OL = Integer.parseInt(offerLoad.substring(1));
 		ReadFiles read = new ReadFiles(path);
 		this.pcks = read.read();
@@ -37,7 +36,7 @@ public class Evaluation {
 			if(pck.latency() <= lats[i]) nPcks[i]++;
 			else if(++i < nDot) nPcks[i]++;
 
-		HandleFiles.WriteFile(outPath + "//", "ED_Lat" + strOL, nPcks, lats, nDot);
+		HandleFiles.writeToFile(outPath + File.pathSeparator + "ED_Lat" + strOL, nPcks, lats);
 	}
 
 	/*
@@ -56,7 +55,7 @@ public class Evaluation {
 			if(pck.accepTraffic() <= accepTraffs[i]) nPcks[i]++;
 			else if(++i < nDot) nPcks[i]++;
 
-		HandleFiles.WriteFile(outPath + "//", "ED_AT" + strOL, nPcks, accepTraffs, nDot);
+		HandleFiles.writeToFile(outPath + File.pathSeparator + "ED_AT" + strOL, nPcks, accepTraffs);
 	}
 
 	/* Escreve arquivo de relatório */
@@ -77,7 +76,7 @@ public class Evaluation {
 					+ getAccepTraffStdDev() + " : " + getAccepTraffMax()
 					+ "]";
 
-			HandleFiles.WriteFile(outPath + "//", "Relatorio" + strOL, Relat);
+			HandleFiles.writeToFile(outPath + File.pathSeparator + "Report" + strOL, Relat);
 	}
 
 	/* geta a carga oferecida do subteste */
