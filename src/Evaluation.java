@@ -2,7 +2,7 @@ import java.io.File;
 import java.util.*;
 
 public class Evaluation {
-	private ArrayList<Packet> pcks;
+	private ArrayList<Package> pcks;
 	private int OL; // carga oferecida
 	private String strOL;
 	private String path; // caminho do teste
@@ -30,9 +30,9 @@ public class Evaluation {
 		double step = (this.latencyMax() + this.latencyMin()) / (double) nDot;
 		for(int i = 0; i < nDot; i++)
 			lats[i] = (double)(i+1)*step;
-		Collections.sort(pcks, new Packet.ByLatency());
+		Collections.sort(pcks, new Package.ByLatencyComparator());
 		int i = 0;
-		for(Packet pck: pcks)
+		for(Package pck: pcks)
 			if(pck.latency() <= lats[i]) nPcks[i]++;
 			else if(++i < nDot) nPcks[i]++;
 
@@ -49,10 +49,10 @@ public class Evaluation {
 		double step = (this.getAccepTraffMax()+this.getAccepTraffMin()) / (double) nDot;
 		for (int i = 1; i < nDot; i++)
 			accepTraffs[i] = (double)(i+1)*step;
-		Collections.sort(pcks, new Packet.ByAcceptedTraffic());
+		Collections.sort(pcks, new Package.ByAcceptedTrafficComparator());
 		int i = 0;
-		for(Packet pck: pcks)
-			if(pck.accepTraffic() <= accepTraffs[i]) nPcks[i]++;
+		for(Package pck: pcks)
+			if(pck.acceptedTraffic() <= accepTraffs[i]) nPcks[i]++;
 			else if(++i < nDot) nPcks[i]++;
 
 		HandleFiles.writeToFile(outPath + File.pathSeparator + "ED_AT" + strOL, nPcks, accepTraffs);
@@ -94,7 +94,7 @@ public class Evaluation {
 		if (pcks.size() != 0) {
 			double latMean = lat[1];
 			double sum = 0;
-			for(Packet pck: pcks)
+			for(Package pck: pcks)
 				sum += Math.pow(pck.latency() - latMean, 2);
 			return Math.sqrt(sum / pcks.size());
 		}
@@ -121,8 +121,8 @@ public class Evaluation {
 		if (pcks.size() != 0) {
 			double accepTraffMean = accTraffic[1];
 			double sum = 0;
-			for(Packet pck: pcks)
-					sum += Math.pow(pck.accepTraffic() - accepTraffMean, 2);
+			for(Package pck: pcks)
+					sum += Math.pow(pck.acceptedTraffic() - accepTraffMean, 2);
 			return Math.sqrt(sum / (double) pcks.size());
 		}
 		return -1.0;

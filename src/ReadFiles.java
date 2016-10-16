@@ -4,7 +4,7 @@ import java.util.*;
 public class ReadFiles {
 
 	private Scanner file;
-	private ArrayList<Packet> pcks = new ArrayList<Packet>();
+	private ArrayList<Package> pcks = new ArrayList<Package>();
 	private String path;
 	private double[] lat = {Double.POSITIVE_INFINITY, 0, Double.NEGATIVE_INFINITY};
 	private double[] accTraffic = {Double.POSITIVE_INFINITY, 0, Double.NEGATIVE_INFINITY};
@@ -14,7 +14,7 @@ public class ReadFiles {
 		this.path = path;
 	}
 
-	public ArrayList<Packet> read() {
+	public ArrayList<Package> read() {
 
 		String[] listfiles = HandleFiles.filesAt(path); // Lista todos os arquivos
 		
@@ -23,7 +23,7 @@ public class ReadFiles {
 
 			file = HandleFiles.openFile(path + File.pathSeparator + listfiles[numbfiles]);
 			while(file.hasNext()) {
-				Packet act = ReadOnePacket();
+				Package act = ReadOnePacket();
 				pcks.add(act);
 				double latency = act.latency();
 				lat[0] = (latency < lat[0]) ? latency : lat[0];
@@ -36,18 +36,18 @@ public class ReadFiles {
 		Collections.sort(pcks); // ordena pelo número de identificação do pacote
 		double acceptedTraffic = 0;
 		for(int i = 0; i < pcks.size()-1; i++) {
-			Packet act = pcks.get(i);
-			Packet next = pcks.get(i+1);
+			Package act = pcks.get(i);
+			Package next = pcks.get(i+1);
 			
 			if(act.src().equals(next.src()))
 				acceptedTraffic = (double)act.size()/(next.tpfext()-act.tpfext());
-			act.setAccepTraffic(acceptedTraffic);
+			act.setAcceptedTraffic(acceptedTraffic);
 			
 			accTraffic[0] = (acceptedTraffic < accTraffic[0]) ? acceptedTraffic : accTraffic[0];
 			accTraffic[1] += acceptedTraffic;
 			accTraffic[2] = (acceptedTraffic > accTraffic[2]) ? acceptedTraffic : accTraffic[2];
 		}
-		pcks.get(pcks.size()-1).setAccepTraffic(acceptedTraffic);
+		pcks.get(pcks.size()-1).setAcceptedTraffic(acceptedTraffic);
 
 		accTraffic[1] /= (double)pcks.size();
 		lat[1] /= (double)pcks.size();
@@ -55,9 +55,9 @@ public class ReadFiles {
 		return pcks;
 	}
 
-	private Packet ReadOnePacket() {
+	private Package ReadOnePacket() {
 		String binTarget = String.format("%16s", Integer.toBinaryString(Integer.parseInt(file.next(), 16))).replace(" ", "0");
-		int size = Integer.parseInt(file.next(), 16);
+		int size = Integer.parseInt(file.next(), 16) + 2;
 		String binSource = String.format("%16s", Integer.toBinaryString(Integer.parseInt(file.next(), 16))).replace(" ", "0");
 		
 		int id = Integer.parseInt(file.next() + file.next(), 16);
@@ -83,7 +83,7 @@ public class ReadFiles {
 		String target = tX + "." + tY;
 		String source = sX + "." + sY;
 
-		Packet pck = new Packet(target, size, source, Latency, Tpflext, id);
+		Package pck = new Package(target, size, source, Latency, Tpflext, id);
 
 		return pck;
 	}
