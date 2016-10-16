@@ -1,3 +1,4 @@
+import java.io.File;
 import java.util.*;
 
 public class ReadFiles {
@@ -15,12 +16,12 @@ public class ReadFiles {
 
 	public ArrayList<Packet> read() {
 
-		String[] listfiles = HandleFiles.getFilepaths(path); // Lista todos os arquivos
+		String[] listfiles = HandleFiles.filesAt(path); // Lista todos os arquivos
 		
 		lat[1] = 0;
 		for (int numbfiles = 0; numbfiles < listfiles.length; numbfiles++) {
 
-			file = HandleFiles.OpenFilestoRead(path +"//"+ listfiles[numbfiles]);
+			file = HandleFiles.openFile(path + File.pathSeparator + listfiles[numbfiles]);
 			while(file.hasNext()) {
 				Packet act = ReadOnePacket();
 				pcks.add(act);
