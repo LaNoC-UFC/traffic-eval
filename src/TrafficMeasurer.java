@@ -65,7 +65,7 @@ public class TrafficMeasurer {
 		double latmean[] = new double[OL.length];
 		for (int i = 0; i < OL.length; i++) {
 			offerload[i] = OL[i].OfferedLoad() / 100.0;
-			latmean[i] = OL[i].latencyMean();
+			latmean[i] = OL[i].averageLatency();
 		}
 		HandleFiles.writeToFile(outPath + rede + File.pathSeparator + "CNF_Lat", offerload, latmean);
 	}
@@ -76,7 +76,7 @@ public class TrafficMeasurer {
 		double accepTraffmean[] = new double[OL.length];
 		for (int i = 0; i < OL.length; i++) {
 			offerload[i] = OL[i].OfferedLoad() / 100.0;
-			accepTraffmean[i] = OL[i].getAccepTraffMean();
+			accepTraffmean[i] = OL[i].averageAccepTraff();
 		}
 		HandleFiles.writeToFile(outPath + rede + File.pathSeparator + "CNF_AT", offerload, accepTraffmean);
 	}
