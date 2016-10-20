@@ -1,7 +1,11 @@
 bin/
 target/
 evaluate/
+results/
 *~
 *.jar
 *.project
 *.classpath
+.idea/
+out/
+*.iml
