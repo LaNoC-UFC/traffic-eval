@@ -1,17 +1,17 @@
-import java.io.File;
+import java.io.*;
 import java.util.*;
 
 public class Evaluation {
 	private ArrayList<Package> pcks;
-	private int OL; // carga oferecida
+    private int OL;
 	private String strOL;
-	private String path; // caminho do teste
+	private String path;
 	private String outPath;
-	private int nDot = 30; // quantidade de pontos do histograma
-	private List<Double> latencies;
-	private List<Double> accTraffics;
+	private int nDot = 30;
+	public List<Double> latencies;
+	public List<Double> accTraffics;
 
-	public Evaluation(String inPath, String outPath, String rede,
+    public Evaluation(String inPath, String outPath, String rede,
 			String offerLoad, String net) {
 		this.strOL = offerLoad;
 		this.outPath = outPath;
@@ -23,69 +23,34 @@ public class Evaluation {
 		accTraffics = read.accTraffics();
 	}
 
-	/* Gera o arquivo para a confecção do Distribuição Espacial da Latência Pura */
-	public void makeHistLat() {
-		int nPcks[] = new int[nDot]; // contém as quantidades pacotes
-		double lats[] = new double[nDot]; // contém as latências distintas
-		double step = (Collections.max(latencies, null) + Collections.min(latencies, null)) / (double) nDot;
-		for(int i = 0; i < nDot; i++)
-			lats[i] = (double)(i+1)*step;
-		Collections.sort(pcks, new Package.ByLatencyComparator());
-		int i = 0;
-		for(Package pck: pcks)
-			if(pck.latency() <= lats[i]) nPcks[i]++;
-			else if(++i < nDot) nPcks[i]++;
-
-		HandleFiles.writeToFile(outPath + File.separator + "SD_Lat" + strOL, nPcks, lats);
+	public void writeHistogramOfLatency() {
+		makeHist(latencies ,"ED_Lat", new Package.ByLatencyComparator());
 	}
 
-	/*
-	 * Gera o arquivo para a confecção do Distribuição Espacial do Tráfego
-	 * Aceito
-	 */
-	public void makeHistAccepTraff() {
-		int nPcks[] = new int[nDot]; // contém as quantidades pacotes
-		double accepTraffs[] = new double[nDot];
-		double step = (Collections.max(accTraffics, null) + Collections.min(accTraffics, null)) / (double) nDot;
-		for (int i = 1; i < nDot; i++)
-			accepTraffs[i] = (double)(i+1)*step;
-		Collections.sort(pcks, new Package.ByAcceptedTrafficComparator());
-		int i = 0;
-		for(Package pck: pcks)
-			if(pck.acceptedTraffic() <= accepTraffs[i]) nPcks[i]++;
-			else if(++i < nDot) nPcks[i]++;
-
-		HandleFiles.writeToFile(outPath + File.separator + "SD_AT" + strOL, nPcks, accepTraffs);
+	public void writeHistogramOfAccepTraff() {
+		makeHist(accTraffics , "ED_AT" , new Package.ByAcceptedTrafficComparator());
 	}
 
-	/* Escreve arquivo de relatório */
 	public void makeRelat() {
 		String[] Relat = new String[4];
 		int i = 0;
-		// nome da rede - tipo de tráfego - carga oferecida
 		Relat[i++] = " - " + OL + "%";
-		// porcentagem de alta e baixa prioridade
 		Relat[i++] = "Quantidade total de pacotes:  " + pcks.size();
-			// latência pura: média+-desvio / [máximo,mínimo]
 			Relat[i++] = "Latencia Total:  [" + Collections.min(latencies, null) + " : "
 					+ averageLatency() + "/" + latencyStdDev() + " : "
 					+ Collections.max(latencies, null) + "]";
-			// tráfego aceito: média+-desvio / [máximo,mínimo]
 			Relat[i++] = "Trafego Aceito Total:  [" + Collections.min(accTraffics, null)
 					+ " : " + averageAccepTraff() + "/"
 					+ accepTraffStdDev() + " : " + Collections.max(accTraffics, null)
 					+ "]";
-
 			HandleFiles.writeToFile(outPath + File.separator + "Report" + strOL, Relat);
 	}
 
-	/* geta a carga oferecida do subteste */
 	public int OfferedLoad() {
 		return OL;
 	}
 
-	public double averageLatency() // média
-	{
+	public double averageLatency() {
 		double accLatency = 0.0;
 		for(double latency : latencies) {
 			accLatency += latency;
@@ -93,8 +58,27 @@ public class Evaluation {
 		return accLatency/latencies.size();
 	}
 
-	private double latencyStdDev() // desvio padrão
-	{
+	private void makeHist(List<Double> vector ,String fileName, Comparator<Package> comparator) {
+		int i = 0;
+		double vectors[] = new double[nDot];
+		int nPcks[] = new int[nDot];
+		Collections.sort(pcks, comparator);
+		double step = (Collections.max(vector, null) + Collections.min(vector, null)) / (double) nDot;
+		for (int j = 1; j < nDot; j++) {
+			vectors[j] = (double)(j+1)*step;
+		}
+		for(Double vec : vector) {
+			if(vec <= vectors[i]){
+				nPcks[i]++;
+			}
+			else if(++i < nDot){
+				nPcks[i]++;
+			}
+		}
+		HandleFiles.writeToFile(outPath + File.separator + fileName + strOL, nPcks, vectors);
+	}
+
+	private double latencyStdDev() {
 		if (pcks.size() != 0) {
 			double latMean = averageLatency();
 			double sum = 0;
@@ -105,8 +89,7 @@ public class Evaluation {
 		return -1.0;
 	}
 
-	public double averageAccepTraff() // média
-	{
+	public double averageAccepTraff() {
 		double accAccTraffic = 0.0;
 		for(double accTraffic : accTraffics) {
 			accAccTraffic += accTraffic;
@@ -114,8 +97,7 @@ public class Evaluation {
 		return accAccTraffic/accTraffics.size();
 	}
 
-	private double accepTraffStdDev() // desvio padrão
-	{
+	private double accepTraffStdDev() {
 		if (pcks.size() != 0) {
 			double accepTraffMean = averageAccepTraff();
 			double sum = 0;
@@ -125,5 +107,4 @@ public class Evaluation {
 		}
 		return -1.0;
 	}
-
 }

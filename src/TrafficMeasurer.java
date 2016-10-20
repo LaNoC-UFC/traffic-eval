@@ -1,8 +1,8 @@
 import java.io.*;
 
 public class TrafficMeasurer {
-	private Evaluation[] OL; // cada uma das cargas oferecidas
-	private String rede; // nome da rede
+	private Evaluation[] OL;
+	private String rede;
 	private String outPath;
 
 	public static void main(String[] args) {
@@ -30,21 +30,18 @@ public class TrafficMeasurer {
 		this.rede = nome;
 		File folder = new File(inPath);
 		String[] pathOL = folder.list();
-		// aloca OL
 		OL = new Evaluation[pathOL.length];
-		// aloca e inicializa cada OL[i]
 		for (int i = 0; i < OL.length; i++)
 			OL[i] = new Evaluation(inPath, outPath, rede, pathOL[i], rede);
 	}
 
 	public void genHistograms() {
 		for (Evaluation e : OL) {
-			e.makeHistLat();
-			e.makeHistAccepTraff();
+			e.writeHistogramOfLatency();
+			e.writeHistogramOfAccepTraff();
 		}
 	}
 
-	/* Gera os arquivos para a confecção dos CNF's de um determinado tipo */
 	public void makeCNFs() {
 		File dir = new File(outPath + rede);
 		dir.mkdir();
@@ -53,13 +50,11 @@ public class TrafficMeasurer {
 		makeCNFLat();
 	}
 
-	/* Gera os relatórios de cada subteste */
 	public void makeRelats() {
 		for (int i = 0; i < OL.length; i++)
 			OL[i].makeRelat();
 	}
-	
-	/* Gera o arquivo para a confecção do CNF de Latência */
+
 	private void makeCNFLat() {
 		double offerload[] = new double[OL.length];
 		double latmean[] = new double[OL.length];
@@ -70,7 +65,6 @@ public class TrafficMeasurer {
 		HandleFiles.writeToFile(outPath + rede + File.separator + "CNF_Lat", offerload, latmean);
 	}
 
-	/* Gera o arquivo para a confecção do CNF de Tráfego Aceito */
 	private void makeCNFAccepTraff() {
 		double offerload[] = new double[OL.length];
 		double accepTraffmean[] = new double[OL.length];
