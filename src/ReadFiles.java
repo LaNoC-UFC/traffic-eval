@@ -20,7 +20,7 @@ public class ReadFiles {
 
 		for (int numbfiles = 0; numbfiles < listfiles.length; numbfiles++) {
 
-			file = HandleFiles.openFile(path + File.pathSeparator + listfiles[numbfiles]);
+			file = HandleFiles.openFile(path + File.separator + listfiles[numbfiles]);
 			while(file.hasNext()) {
 				Package act = ReadOnePacket();
 				pcks.add(act);

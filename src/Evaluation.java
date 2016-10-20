@@ -15,7 +15,7 @@ public class Evaluation {
 			String offerLoad, String net) {
 		this.strOL = offerLoad;
 		this.outPath = outPath;
-		this.path = inPath + File.pathSeparator + offerLoad;
+		this.path = inPath + File.separator + offerLoad;
 		this.OL = Integer.parseInt(offerLoad.substring(1));
 		ReadFiles read = new ReadFiles(path);
 		this.pcks = read.read();
@@ -36,7 +36,7 @@ public class Evaluation {
 			if(pck.latency() <= lats[i]) nPcks[i]++;
 			else if(++i < nDot) nPcks[i]++;
 
-		HandleFiles.writeToFile(outPath + File.pathSeparator + "ED_Lat" + strOL, nPcks, lats);
+		HandleFiles.writeToFile(outPath + File.separator + "SD_Lat" + strOL, nPcks, lats);
 	}
 
 	/*
@@ -55,7 +55,7 @@ public class Evaluation {
 			if(pck.acceptedTraffic() <= accepTraffs[i]) nPcks[i]++;
 			else if(++i < nDot) nPcks[i]++;
 
-		HandleFiles.writeToFile(outPath + File.pathSeparator + "ED_AT" + strOL, nPcks, accepTraffs);
+		HandleFiles.writeToFile(outPath + File.separator + "SD_AT" + strOL, nPcks, accepTraffs);
 	}
 
 	/* Escreve arquivo de relatório */
@@ -76,7 +76,7 @@ public class Evaluation {
 					+ accepTraffStdDev() + " : " + Collections.max(accTraffics, null)
 					+ "]";
 
-			HandleFiles.writeToFile(outPath + File.pathSeparator + "Report" + strOL, Relat);
+			HandleFiles.writeToFile(outPath + File.separator + "Report" + strOL, Relat);
 	}
 
 	/* geta a carga oferecida do subteste */

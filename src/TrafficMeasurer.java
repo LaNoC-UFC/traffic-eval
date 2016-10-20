@@ -67,7 +67,7 @@ public class TrafficMeasurer {
 			offerload[i] = OL[i].OfferedLoad() / 100.0;
 			latmean[i] = OL[i].averageLatency();
 		}
-		HandleFiles.writeToFile(outPath + rede + File.pathSeparator + "CNF_Lat", offerload, latmean);
+		HandleFiles.writeToFile(outPath + rede + File.separator + "CNF_Lat", offerload, latmean);
 	}
 
 	/* Gera o arquivo para a confecção do CNF de Tráfego Aceito */
@@ -78,7 +78,7 @@ public class TrafficMeasurer {
 			offerload[i] = OL[i].OfferedLoad() / 100.0;
 			accepTraffmean[i] = OL[i].averageAccepTraff();
 		}
-		HandleFiles.writeToFile(outPath + rede + File.pathSeparator + "CNF_AT", offerload, accepTraffmean);
+		HandleFiles.writeToFile(outPath + rede + File.separator + "CNF_AT", offerload, accepTraffmean);
 	}
 
 }
