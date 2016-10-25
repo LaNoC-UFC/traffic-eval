@@ -36,7 +36,7 @@ public class ReadFiles {
 			Package next = pcks.get(i+1);
 			
 			if(act.src().equals(next.src())) {
-				acceptedTraffic = (double)act.size()/(next.tpfext()-act.tpfext());
+				acceptedTraffic = (double)act.size()/(next.entryTime()-act.entryTime());
 			}
 			act.setAcceptedTraffic(acceptedTraffic);
 			accTraffics.add(acceptedTraffic);
@@ -53,7 +53,7 @@ public class ReadFiles {
 		
 		int id = Integer.parseInt(file.next() + file.next(), 16);
 		
-		double Tpflext = Double.parseDouble(file.next());
+		double entryTime = Double.parseDouble(file.next());
 		double Latency = Double.parseDouble(file.next());
 
 		file.nextLine(); // Pega o que sobrou da linha
@@ -74,7 +74,7 @@ public class ReadFiles {
 		String target = tX + "." + tY;
 		String source = sX + "." + sY;
 
-		Package pck = new Package(target, size, source, Latency, Tpflext, id);
+		Package pck = new Package(target, size, source, Latency, entryTime, id);
 
 		return pck;
 	}
