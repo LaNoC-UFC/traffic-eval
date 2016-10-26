@@ -24,7 +24,7 @@ a file must be written in the following way:
   * sourceAddress (in hexadecimal format)
   * ID (1st part, in hexadecimal format)
   * ID (2nd part, in hexadecimal format)
-  * Time of the arrival of the first flit (in decimal format).
+  * Entry time of the packet in the network (in decimal format).
   * Latency (in decimal format).
  
 Example of the tree of directories: 

@@ -4,17 +4,17 @@ class Package implements Comparable<Package> {
     private int size;
     private double latency;
     private double acceptedTraffic;
-    private double tpflext;
+    private double entryTime;
     private String source;
     private String target;
     private int id;
 
-    Package(String target, int size, String source, double latency, double tpflext, int id) {
+    Package(String target, int size, String source, double latency, double entryTime, int id) {
         this.size = size;
         this.latency = latency;
         this.source = source;
         this.target = target;
-        this.tpflext = tpflext;
+        this.entryTime = entryTime;
         this.id = id;
     }
 
@@ -26,8 +26,8 @@ class Package implements Comparable<Package> {
         return size;
     }
 
-    double tpfext() {
-        return tpflext;
+    double entryTime() {
+        return entryTime;
     }
 
     String src() {
@@ -60,7 +60,7 @@ class Package implements Comparable<Package> {
                 "->" + target +
                 ", lat: " + latency +
                 " accTraf: " + acceptedTraffic +
-                ", tpfext: " + tpflext;
+                ", entryTime: " + entryTime;
     }
 
     static class ByLatencyComparator implements Comparator<Package> {
