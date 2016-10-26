@@ -1,4 +1,5 @@
 import java.io.*;
+import java.util.*;
 
 public class TrafficMeasurer {
 	private Evaluation[] OL;
@@ -45,7 +46,6 @@ public class TrafficMeasurer {
 	public void makeCNFs() {
 		File dir = new File(outPath + rede);
 		dir.mkdir();
-
 		makeCNFAccepTraff();
 		makeCNFLat();
 	}
@@ -55,24 +55,27 @@ public class TrafficMeasurer {
 			OL[i].makeRelat();
 	}
 
-	private void makeCNFLat() {
-		double offerload[] = new double[OL.length];
-		double latmean[] = new double[OL.length];
+	private void makeCNFLat()  {
+		double[] averageLatency = null;
 		for (int i = 0; i < OL.length; i++) {
-			offerload[i] = OL[i].OfferedLoad() / 100.0;
-			latmean[i] = OL[i].averageLatency();
+			averageLatency[i] = OL[i].averageLatency();
 		}
-		HandleFiles.writeToFile(outPath + rede + File.separator + "CNF_Lat", offerload, latmean);
+		makeCNF(averageLatency , "CNF_Lat");
 	}
 
 	private void makeCNFAccepTraff() {
-		double offerload[] = new double[OL.length];
-		double accepTraffmean[] = new double[OL.length];
+		double[] averageAccepTraff = null;
 		for (int i = 0; i < OL.length; i++) {
-			offerload[i] = OL[i].OfferedLoad() / 100.0;
-			accepTraffmean[i] = OL[i].averageAccepTraff();
+			averageAccepTraff[i] = OL[i].averageAccepTraff();
 		}
-		HandleFiles.writeToFile(outPath + rede + File.separator + "CNF_AT", offerload, accepTraffmean);
+		makeCNF(averageAccepTraff, "CNF_AT");
 	}
 
+	private void makeCNF (double[] vectormean, String filename) {
+		double offerload[] = new double[vectormean.length];
+		for (int i = 0; i < OL.length; i++) {
+			offerload[i] = OL[i].OfferedLoad() / 100.0;
+		}
+		HandleFiles.writeToFile(outPath + rede + File.separator + filename, offerload, vectormean);
+	}
 }
