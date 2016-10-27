@@ -56,7 +56,7 @@ public class TrafficMeasurer {
 	}
 
 	private void makeCNFLat()  {
-		double[] averageLatency = null;
+		double[] averageLatency = new double[OL.length];
 		for (int i = 0; i < OL.length; i++) {
 			averageLatency[i] = OL[i].averageLatency();
 		}
@@ -64,7 +64,7 @@ public class TrafficMeasurer {
 	}
 
 	private void makeCNFAccepTraff() {
-		double[] averageAccepTraff = null;
+		double[] averageAccepTraff = new double[OL.length];
 		for (int i = 0; i < OL.length; i++) {
 			averageAccepTraff[i] = OL[i].averageAccepTraff();
 		}

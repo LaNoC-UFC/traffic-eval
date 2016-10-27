@@ -50,14 +50,6 @@ public class Evaluation {
 		return OL;
 	}
 
-	public double averageLatency() {
-		double accLatency = 0.0;
-		for(double latency : latencies) {
-			accLatency += latency;
-		}
-		return accLatency/latencies.size();
-	}
-
 	private void makeHist(List<Double> vector ,String fileName, Comparator<Package> comparator) {
 		int i = 0;
 		double vectors[] = new double[nDot];
@@ -78,33 +70,38 @@ public class Evaluation {
 		HandleFiles.writeToFile(outPath + File.separator + fileName + strOL, nPcks, vectors);
 	}
 
+	public double averageLatency() {
+		return averageOf(latencies);
+	}
+
 	private double latencyStdDev() {
-		if (pcks.size() != 0) {
-			double latMean = averageLatency();
-			double sum = 0;
-			for(Package pck: pcks)
-				sum += Math.pow(pck.latency() - latMean, 2);
-			return Math.sqrt(sum / pcks.size());
-		}
-		return -1.0;
+		return stdDeviationOf(latencies);
 	}
 
 	public double averageAccepTraff() {
-		double accAccTraffic = 0.0;
-		for(double accTraffic : accTraffics) {
-			accAccTraffic += accTraffic;
-		}
-		return accAccTraffic/accTraffics.size();
+		return averageOf(accTraffics);
 	}
 
 	private double accepTraffStdDev() {
-		if (pcks.size() != 0) {
-			double accepTraffMean = averageAccepTraff();
-			double sum = 0;
-			for(Package pck: pcks)
-					sum += Math.pow(pck.acceptedTraffic() - accepTraffMean, 2);
-			return Math.sqrt(sum / (double) pcks.size());
+		return stdDeviationOf(accTraffics);
+	}
+
+	private double stdDeviationOf(List<Double> values) {
+		assert (values.size() != 0) : "Size Values is 0";
+		double average = averageOf(values);
+		double accumulator = 0.0;
+		for(double value: values) {
+			accumulator += Math.pow(value - average, 2);
 		}
-		return -1.0;
+		return Math.sqrt(accumulator / values.size());
+	}
+
+	private double averageOf(List<Double> values){
+		assert (values.size() != 0) : "Size Values is 0";
+		double accumulator = 0.0;
+		for (double value : values) {
+			accumulator += value;
+		}
+		return accumulator / values.size();
 	}
 }
