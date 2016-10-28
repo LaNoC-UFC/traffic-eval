@@ -3,88 +3,88 @@ import java.util.*;
 
 public class ReadFiles {
 
-	private Scanner file;
-	private ArrayList<Package> pcks = new ArrayList<Package>();
-	private String path;
-	List<Double> latencies = new ArrayList<>();
-	List<Double> accTraffics = new ArrayList<>();
+    private Scanner file;
+    private ArrayList<Package> pcks = new ArrayList<Package>();
+    private String path;
+    List<Double> latencies = new ArrayList<>();
+    List<Double> accTraffics = new ArrayList<>();
 
-	
-	public ReadFiles(String path) {
-		this.path = path;
-	}
 
-	public ArrayList<Package> read() {
+    public ReadFiles(String path) {
+        this.path = path;
+    }
 
-		String[] listfiles = HandleFiles.filesAt(path); // Lista todos os arquivos
+    public ArrayList<Package> read() {
 
-		for (int numbfiles = 0; numbfiles < listfiles.length; numbfiles++) {
+        String[] listfiles = HandleFiles.filesAt(path); // Lista todos os arquivos
 
-			file = HandleFiles.openFile(path + File.separator + listfiles[numbfiles]);
-			while(file.hasNext()) {
-				Package act = ReadOnePacket();
-				pcks.add(act);
-				latencies.add(act.latency());
-			}
-			file.close();
-		}
-			
-		Collections.sort(pcks); // ordena pelo número de identificação do pacote
-		double acceptedTraffic = 0;
-		for(int i = 0; i < pcks.size()-1; i++) {
-			Package act = pcks.get(i);
-			Package next = pcks.get(i+1);
-			
-			if(act.src().equals(next.src())) {
-				acceptedTraffic = (double)act.size()/(next.entryTime()-act.entryTime());
-			}
-			act.setAcceptedTraffic(acceptedTraffic);
-			accTraffics.add(acceptedTraffic);
-		}
-		pcks.get(pcks.size()-1).setAcceptedTraffic(acceptedTraffic);
+        for (int numbfiles = 0; numbfiles < listfiles.length; numbfiles++) {
 
-		return pcks;
-	}
+            file = HandleFiles.openFile(path + File.separator + listfiles[numbfiles]);
+            while(file.hasNext()) {
+                Package act = ReadOnePacket();
+                pcks.add(act);
+                latencies.add(act.latency());
+            }
+            file.close();
+        }
 
-	private Package ReadOnePacket() {
-		String binTarget = String.format("%16s", Integer.toBinaryString(Integer.parseInt(file.next(), 16))).replace(" ", "0");
-		int size = Integer.parseInt(file.next(), 16) + 2;
-		String binSource = String.format("%16s", Integer.toBinaryString(Integer.parseInt(file.next(), 16))).replace(" ", "0");
-		
-		int id = Integer.parseInt(file.next() + file.next(), 16);
-		
-		double entryTime = Double.parseDouble(file.next());
-		double Latency = Double.parseDouble(file.next());
+        Collections.sort(pcks); // ordena pelo número de identificação do pacote
+        double acceptedTraffic = 0;
+        for(int i = 0; i < pcks.size()-1; i++) {
+            Package act = pcks.get(i);
+            Package next = pcks.get(i+1);
 
-		file.nextLine(); // Pega o que sobrou da linha
+            if(act.src().equals(next.src())) {
+                acceptedTraffic = (double)act.size()/(next.entryTime()-act.entryTime());
+            }
+            act.setAcceptedTraffic(acceptedTraffic);
+            accTraffics.add(acceptedTraffic);
+        }
+        pcks.get(pcks.size()-1).setAcceptedTraffic(acceptedTraffic);
 
-		int tX = Integer.parseInt(
-				binTarget.substring(0, binTarget.length() / 2), 2);
-		int tY = Integer
-				.parseInt(
-						binTarget.substring(binTarget.length() / 2,
-								binTarget.length()), 2);
-		int sX = Integer.parseInt(
-				binSource.substring(0, binSource.length() / 2), 2);
-		int sY = Integer
-				.parseInt(
-						binSource.substring(binSource.length() / 2,
-								binSource.length()), 2);
+        return pcks;
+    }
 
-		String target = tX + "." + tY;
-		String source = sX + "." + sY;
+    private Package ReadOnePacket() {
+        String binTarget = String.format("%16s", Integer.toBinaryString(Integer.parseInt(file.next(), 16))).replace(" ", "0");
+        int size = Integer.parseInt(file.next(), 16) + 2;
+        String binSource = String.format("%16s", Integer.toBinaryString(Integer.parseInt(file.next(), 16))).replace(" ", "0");
 
-		Package pck = new Package(target, size, source, Latency, entryTime, id);
+        int id = Integer.parseInt(file.next() + file.next(), 16);
 
-		return pck;
-	}
+        double entryTime = Double.parseDouble(file.next());
+        double Latency = Double.parseDouble(file.next());
 
-	public List<Double> latencies() {
-		return this.latencies;
-	}
+        file.nextLine(); // Pega o que sobrou da linha
 
-	public List<Double> accTraffics() {
-		return this.accTraffics;
-	}
+        int tX = Integer.parseInt(
+                binTarget.substring(0, binTarget.length() / 2), 2);
+        int tY = Integer
+                .parseInt(
+                        binTarget.substring(binTarget.length() / 2,
+                                binTarget.length()), 2);
+        int sX = Integer.parseInt(
+                binSource.substring(0, binSource.length() / 2), 2);
+        int sY = Integer
+                .parseInt(
+                        binSource.substring(binSource.length() / 2,
+                                binSource.length()), 2);
+
+        String target = tX + "." + tY;
+        String source = sX + "." + sY;
+
+        Package pck = new Package(target, size, source, Latency, entryTime, id);
+
+        return pck;
+    }
+
+    public List<Double> latencies() {
+        return this.latencies;
+    }
+
+    public List<Double> accTraffics() {
+        return this.accTraffics;
+    }
 
 }
