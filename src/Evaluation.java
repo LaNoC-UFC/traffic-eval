@@ -23,6 +23,18 @@ public class Evaluation {
         accTraffics = read.accTraffics();
     }
 
+    public Evaluation(String inPath, String outPath, String rede,
+                      String offerLoad, String net, String targetAddress, String sourceAddress) {
+        this.strOL = offerLoad;
+        this.outPath = outPath;
+        this.path = inPath + File.separator + offerLoad;
+        this.OL = Integer.parseInt(offerLoad.substring(1));
+        ReadFiles read = new ReadFiles(path);
+        this.pcks = read.readSpecificTarget(targetAddress, sourceAddress);
+        latencies = read.latencies();
+        accTraffics = read.accTraffics();
+    }
+
     public void writeHistogramOfLatency() {
         makeHist(latencies ,"ED_Lat", new Package.ByLatencyComparator());
     }
