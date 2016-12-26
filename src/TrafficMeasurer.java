@@ -5,10 +5,15 @@ public class TrafficMeasurer {
     private Evaluation[] OL;
     private String rede;
     private String outPath;
+    private String targetAddress;
+    private String sourceAddress ;
 
     public static void main(String[] args) {
         String inPath = "./evaluate";
         String outPath = "./results";
+
+        String sourceAddress = "0001";
+        String targetAddress = "0000";
 
         if (args.length == 1) {
             inPath = args[0];
@@ -19,7 +24,14 @@ public class TrafficMeasurer {
         }
 
         System.out.println("Evaluating traffic from " + inPath);
-        TrafficMeasurer eval = new TrafficMeasurer("", inPath, outPath);
+
+        TrafficMeasurer eval = null;
+        if(sourceAddress.isEmpty() && targetAddress.isEmpty()){
+            eval = new TrafficMeasurer("", inPath, outPath);
+        }else{
+            eval = new TrafficMeasurer("", inPath, outPath, targetAddress, sourceAddress);
+        }
+
         eval.makeCNFs();
         eval.genHistograms();
         eval.makeRelats();
@@ -34,6 +46,20 @@ public class TrafficMeasurer {
         OL = new Evaluation[pathOL.length];
         for (int i = 0; i < OL.length; i++)
             OL[i] = new Evaluation(inPath, outPath, rede, pathOL[i], rede);
+    }
+
+    public TrafficMeasurer(String nome, String inPath, String outPath, String targetAddress, String sourceAddress) {
+        this.outPath = outPath;
+        this.rede = nome;
+
+        this.targetAddress = targetAddress;
+        this.sourceAddress = sourceAddress ;
+
+        File folder = new File(inPath);
+        String[] pathOL = folder.list();
+        OL = new Evaluation[pathOL.length];
+        for (int i = 0; i < OL.length; i++)
+            OL[i] = new Evaluation(inPath, outPath, rede, pathOL[i], rede, targetAddress, sourceAddress);
     }
 
     public void genHistograms() {
